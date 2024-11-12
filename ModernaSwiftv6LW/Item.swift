@@ -9,10 +9,14 @@ import Foundation
 import SwiftData
 
 @Model
-final class Item {
-    var timestamp: Date
+class Task: Identifiable {
+    var id: UUID
+    var title: String
+    var isCompleted: Bool = false
     
-    init(timestamp: Date) {
-        self.timestamp = timestamp
+    init(id: UUID = UUID(), title: String, isCompleted: Bool = false) {
+        self.id = id
+        self.title = title
+        self.isCompleted = isCompleted
     }
 }

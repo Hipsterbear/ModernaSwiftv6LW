@@ -4,16 +4,17 @@
 //
 //  Created by L W on 2024-11-12.
 //
-
 import SwiftUI
 import SwiftData
 
 @main
 struct ModernaSwiftv6LWApp: App {
+
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            Task.self,
         ])
+        
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
         do {
@@ -30,3 +31,4 @@ struct ModernaSwiftv6LWApp: App {
         .modelContainer(sharedModelContainer)
     }
 }
+

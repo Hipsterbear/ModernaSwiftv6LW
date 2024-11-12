@@ -6,56 +6,57 @@
 //
 
 import SwiftUI
-import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    @State private var tasks: [Task] = []
+    @State private var isPresentingNewTaskView = false  // Controls the sheet
 
     var body: some View {
-        NavigationSplitView {
+        NavigationView {
             List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
+                ForEach(tasks) { task in
+                    HStack {
+                        Text(task.title)
+                        Spacer()
+                        if task.isCompleted {
+                            Text("Done")
+                                .foregroundColor(.green)
+                        }
+                    }
+                    .onTapGesture {
+                        toggleTaskCompletion(task)
                     }
                 }
-                .onDelete(perform: deleteItems)
             }
+            .navigationTitle("To-Do List")
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
+                Button(action: { isPresentingNewTaskView = true }) {
+                    Image(systemName: "plus")
                 }
             }
-        } detail: {
-            Text("Select an item")
-        }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+            .sheet(isPresented: $isPresentingNewTaskView) {
+                NewTaskView { taskTitle in
+                    addTask(title: taskTitle)
+                }
             }
         }
     }
+
+    // Private helper functions should be at the top level inside ContentView, not nested
+    private func toggleTaskCompletion(_ task: Task) {
+        if let index = tasks.firstIndex(where: { $0.id == task.id }) {
+            tasks[index].isCompleted.toggle()
+            sortTasks()
+        }
+    }
+
+    private func addTask(title: String) {
+        tasks.append(Task(title: title))  // Pass the title to the initializer
+        sortTasks()
+    }
+
+    private func sortTasks() {
+        tasks.sort { !$0.isCompleted && $1.isCompleted }
+    }
 }
 
-#Preview {
-    ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
-}
